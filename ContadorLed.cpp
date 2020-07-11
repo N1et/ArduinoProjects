@@ -1,3 +1,18 @@
+int signal = 0;
+
+long readUltrasonicDistance(int triggerPin, int echoPin)
+{
+  pinMode(triggerPin, OUTPUT);  // Clear the trigger
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigger pin to HIGH state for 10 microseconds
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+  pinMode(echoPin, INPUT);
+  // Reads the echo pin, and returns the sound wave travel time in microseconds
+  return pulseIn(echoPin, HIGH);
+}
 
 void setup(){
  // display three
@@ -19,7 +34,11 @@ void setup(){
  pinMode(4, OUTPUT);
  pinMode(3, OUTPUT);
  pinMode(2, OUTPUT);
+ pinMode(1, OUTPUT);
   
+ pinMode(14, OUTPUT);
+ pinMode(15, OUTPUT);
+ 
 }
 
 void setDisplay(int port, int n) { // 2
@@ -60,38 +79,37 @@ void setDisplay(int port, int n) { // 2
     case 9:
     	digitalWrite(port, HIGH);
     	digitalWrite(port+3, HIGH);
+    	break;
     
   }
 }
 
-#define DISPLAY1 2
+#define DISPLAY1 1
 #define DISPLAY2 6
 #define DISPLAY3 10
 
-void loop(){
-  int i = 5; // min 
-  int x = 9; // secs
-  int y = 9; // msecs
+void ConvertToDisplay(int numb){
+  int i = numb;
   
-  setDisplay(DISPLAY1, 6);
-  setDisplay(DISPLAY2, 0);
-  setDisplay(DISPLAY3, 0);
-  delay(1000);
-  for(; i >= 0 ; i--){
+  setDisplay(DISPLAY1, 0);
+  if(numb >= 100){
+    for(; i >= 10; i/=10);
     setDisplay(DISPLAY1, i);
+  }  
+    i=numb/10;
+    i= i % 10;
+    setDisplay(DISPLAY2, i);
     
-    for(x=9; x >= 0; x--){
-    	setDisplay(DISPLAY2, x);
-        
-      	for(y=9; y >= 0 ; y--) {
-           setDisplay(DISPLAY3, y);
-           delay(500);
-      }  
-    }   
-  }
- 
-    digitalWrite(5, HIGH);
-    delay(10000);
-    
-  
+    i=numb%10;
+    setDisplay(DISPLAY3, i);
+
 }
+
+
+void loop(){
+ signal = 0.01723 * readUltrasonicDistance(14, 15);
+ 
+ ConvertToDisplay(signal);
+ delay(1000);
+}
+  
